@@ -1,38 +1,67 @@
 # Antigravity Usage for OpenChamber
 
-Displays the four Antigravity quota windows (`5-Hour`, `Weekly`, `Claude/GPT | 5-Hour`, `Claude/GPT | Weekly`) in OpenChamber's native **Usage** and **Work Status** panels using `agy -p /usage --output-format json`.
+Live Antigravity CLI (`agy`) quota tracking inside OpenChamber's native **Usage** and **Work Status** panels — without OAuth plugins, token scraping, or ACP dependencies.
 
-- **No ACP plugin required:** Works independently of `opencode-antigravity-acp` or any OpenCode provider plugin. It only reads quota from the official `agy` CLI.
-- **Two-decimal precision:** Reads exact `remaining_fraction` values from `agy` JSON output and formats `valueLabel` to two decimal places while preserving numeric `usedPercent` for OpenChamber's built-in warning/error color thresholds.
-- **Safe defaults:** Never reads or stores Google OAuth token files; runs `agy` with a minimal allowlisted environment and handles invalid `1970` epoch reset dates as unknown (`null`).
+![Antigravity usage in OpenChamber](assets/usage-preview.png)
 
-> **Note:** Google states that wrapping `agy` in third-party applications is unsupported under consumer plans. Use at your own discretion.
+## Why This Exists
+
+- **Works standalone:** Requires only the official `agy` CLI — no `opencode-antigravity-acp` or third-party OAuth plugin needed.
+- **Two-decimal precision:** Reads exact `remaining_fraction` values from `agy -p /usage --output-format json` instead of rounded text output.
+- **Native OpenChamber UI:** Reports numeric `usedPercent` so OpenChamber's built-in color thresholds apply automatically (`50%+` warning, `80%+` error).
+- **Safe reset handling:** Converts invalid `1970` epoch reset timestamps (reported for Claude/GPT windows) to `null` (unknown).
 
 ## Requirements
 
-- **OpenChamber** `>= 2.7.0`
-- **Antigravity CLI (`agy`)** installed (in `~/.local/bin/agy`, `/opt/homebrew/bin/agy`, `/usr/local/bin/agy`, or on `PATH`) and signed in (`agy -p /usage` works in your terminal)
+| Requirement | Details |
+| --- | --- |
+| **OpenChamber** | `>= 2.7.0` (runs the pre-built `service/main.js` host bundle; no Node/Bun needed for end users) |
+| **Antigravity CLI (`agy`)** | Installed in `~/.local/bin/agy`, `/opt/homebrew/bin/agy`, `/usr/local/bin/agy`, or on `PATH` |
+| **CLI Auth** | Signed in (`agy -p /usage` works in your terminal) |
 
-## Installation
+## Quick Start
 
-1. Clone or download this repository:
+1. **Clone** the repository:
    ```bash
    git clone https://github.com/omkardamame/openchamber-antigravity-usage.git
    ```
-2. In OpenChamber, open **Settings → Extensions** and add the cloned folder path.
-3. Approve the local service permission (`exec: ["agy"]`).
-4. Enable the **Antigravity** extension provider under **Settings → Usage** / **Work Status**.
+2. **Add extension** in OpenChamber: **Settings → Extensions** → select the cloned folder.
+3. **Approve permission** when prompted (`exec: ["agy"]`).
+4. **Enable provider** under **Settings → Usage** / **Work Status**.
+
+## Architecture & Security
+
+```text
+OpenChamber Host ──(POST /quota, Bearer token)──▶ service/main.js (127.0.0.1)
+                                                        │
+                                                        ▼ execFile (no shell, allowlisted env)
+                                                   agy -p /usage --output-format json
+```
+
+- **Auth:** Constant-time Bearer token verification (`timingSafeEqual`) on `/health` and `/quota`.
+- **Process isolation:** Invokes `agy` directly via `execFile` (no shell interpolation) with an allowlisted environment (`HOME`, `PATH`, `LANG`, `LC_ALL`, `TMPDIR`, `USER`) so `OPENCHAMBER_SERVICE_TOKEN` never leaks to child processes.
+- **Resilience:** Coalesces concurrent `/quota` requests, caches the resolved `agy` binary path (invalidating on `ENOENT`), enforces an `18s` CLI timeout (under OpenChamber's `20s` quota deadline) and `64 KB` max request body, and fails closed on malformed JSON.
+
+## Project Layout
+
+- `package.json` — OpenChamber extension manifest (`apiVersion: 1`, `provides: ["quota"]`)
+- `service/source.js` — HTTP server (`/health`, `/quota`) and graceful shutdown
+- `service/quota.js` — `agy` discovery, minimal-env execution, and strict JSON parser
+- `service/main.js` — Pre-built Node bundle for OpenChamber's host runtime
+- `service/test.mjs` — Unit & HTTP handler tests (`node --test`)
 
 ## Development
 
-Pre-built `service/main.js` is included so end users do not need Node.js or Bun installed separately.
-
 ```bash
 npm install
-npm test
-npm run build
+npm test      # Run unit & handler tests (node --test)
+npm run build # Rebuild service/main.js with bun
 ```
+
+## Policy Notice
+
+Google states that wrapping `agy` in third-party applications is unsupported under consumer plans. This extension executes the official `agy` CLI locally; use at your own discretion.
 
 ## License
 
-[MIT](LICENSE) © Omkar Damame
+[MIT](LICENSE) © 2026 Omkar Damame
