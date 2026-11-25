@@ -1,0 +1,47 @@
+{
+  "name": "openchamber-antigravity-usage",
+  "version": "1.0.0",
+  "description": "OpenChamber usage extension for Antigravity CLI (agy) quota windows",
+  "license": "MIT",
+  "author": "Omkar Damame",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omkardamame/openchamber-antigravity-usage.git"
+  },
+  "homepage": "https://github.com/omkardamame/openchamber-antigravity-usage#readme",
+  "bugs": {
+    "url": "https://github.com/omkardamame/openchamber-antigravity-usage/issues"
+  },
+  "keywords": [
+    "openchamber",
+    "openchamber-extension",
+    "antigravity",
+    "agy",
+    "quota",
+    "usage"
+  ],
+  "type": "module",
+  "openchamber": {
+    "apiVersion": 1,
+    "engines": { "openchamber": ">=2.7.0" },
+    "contributes": {
+      "panel": {
+        "id": "antigravity-usage",
+        "name": "Antigravity",
+        "icon": "sparkling-2"
+      },
+      "service": {
+        "entry": "service/main.js",
+        "runtime": "host",
+        "provides": ["quota"],
+        "permissions": { "exec": ["agy"] }
+      },
+      "quota": { "providers": [] }
+    }
+  },
+  "scripts": {
+    "build": "bun build service/source.js --target=node --outfile=service/main.js",
+    "test": "node --test service/test.mjs"
+  },
+  "dependencies": { "@openchamber/sdk": "2.7.0" }
+}
