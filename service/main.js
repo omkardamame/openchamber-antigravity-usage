@@ -1,4 +1,4 @@
-// service/source.js
+// service/src/main.js
 import http from "node:http";
 import { timingSafeEqual } from "node:crypto";
 import { resolve } from "node:path";
@@ -188,7 +188,7 @@ var readQuotaProviderRequest = (body) => {
 // node_modules/@openchamber/sdk/dist/service-surface.js
 var SURFACE_CONTROLLERS = ["none", "agent", "user"];
 var CONTROLLERS = new Set(SURFACE_CONTROLLERS);
-// service/quota.js
+// service/src/quota.js
 import { accessSync, constants } from "node:fs";
 import { homedir } from "node:os";
 import { delimiter, join } from "node:path";
@@ -333,7 +333,7 @@ async function readUsage({
   }
 }
 
-// service/source.js
+// service/src/main.js
 var MAX_BODY_BYTES = 65536;
 function sendJson(res, status, data) {
   res.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" });

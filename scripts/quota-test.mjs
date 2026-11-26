@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Readable } from 'node:stream';
-import { findAgy, parseUsage, readUsage } from './quota.js';
-import { createRequestHandler } from './source.js';
+import { findAgy, parseUsage, readUsage } from '../service/src/quota.js';
+import { createRequestHandler } from '../service/src/main.js';
 
 const sample = JSON.stringify({
   status: 'SUCCESS',

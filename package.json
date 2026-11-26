@@ -23,7 +23,9 @@
   "type": "module",
   "openchamber": {
     "apiVersion": 1,
-    "engines": { "openchamber": ">=2.7.0" },
+    "engines": {
+      "openchamber": ">=2.7.0"
+    },
     "contributes": {
       "panel": {
         "id": "antigravity-usage",
@@ -33,15 +35,29 @@
       "service": {
         "entry": "service/main.js",
         "runtime": "host",
-        "provides": ["quota"],
-        "permissions": { "exec": ["agy"] }
+        "provides": [
+          "quota"
+        ],
+        "permissions": {
+          "exec": [
+            "agy"
+          ]
+        }
       },
-      "quota": { "providers": [] }
+      "quota": {
+        "providers": []
+      }
     }
   },
   "scripts": {
-    "build": "bun build service/source.js --target=node --outfile=service/main.js",
-    "test": "node --test service/test.mjs"
+    "build": "bunx openchamber-guest-bundle --node service/src/main.js service/main.js",
+    "check": "bunx openchamber-guest-check",
+    "test": "bash scripts/verify.sh",
+    "test:quota": "node --test scripts/quota-test.mjs",
+    "secret-scan": "bash scripts/secret-scan.sh",
+    "verify": "bash scripts/verify.sh"
   },
-  "dependencies": { "@openchamber/sdk": "2.7.0" }
+  "dependencies": {
+    "@openchamber/sdk": "2.7.0"
+  }
 }

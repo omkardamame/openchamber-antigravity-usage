@@ -45,17 +45,18 @@ OpenChamber Host ──(POST /quota, Bearer token)──▶ service/main.js (127
 ## Project Layout
 
 - `package.json` — OpenChamber extension manifest (`apiVersion: 1`, `provides: ["quota"]`)
-- `service/source.js` — HTTP server (`/health`, `/quota`) and graceful shutdown
-- `service/quota.js` — `agy` discovery, minimal-env execution, and strict JSON parser
+- `service/src/main.js` — HTTP server (`/health`, `/quota`) and graceful shutdown
+- `service/src/quota.js` — `agy` discovery, minimal-env execution, and strict JSON parser
 - `service/main.js` — Pre-built Node bundle for OpenChamber's host runtime
-- `service/test.mjs` — Unit & HTTP handler tests (`node --test`)
+- `scripts/quota-test.mjs` — Unit & HTTP handler tests (`node --test`)
+- `scripts/verify.sh` — Full verification gate (build, manifest check, tests, secret scan, changelog)
 
 ## Development
 
 ```bash
 npm install
-npm test      # Run unit & handler tests (node --test)
-npm run build # Rebuild service/main.js with bun
+npm test      # Run full verification gate (build, check, tests, secret scan, changelog)
+npm run build # Rebuild service/main.js via openchamber-guest-bundle
 ```
 
 ## Policy Notice
